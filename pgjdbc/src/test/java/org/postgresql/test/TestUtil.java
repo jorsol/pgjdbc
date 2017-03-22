@@ -378,8 +378,10 @@ public class TestUtil {
       // Drop the table
       dropTable(con, table);
 
+      String unlogged = haveMinimumServerVersion(con, ServerVersion.v9_1) ? "UNLOGGED" : "";
+
       // Now create the table
-      String sql = "CREATE TABLE " + table + " (" + columns + ")";
+      String sql = "CREATE " + unlogged + " TABLE " + table + " (" + columns + ")";
 
       if (withOids) {
         sql += " WITH OIDS";
