@@ -76,6 +76,11 @@ matrix:
         - REPLICATION=Y
     - jdk: oraclejdk8
       sudo: required
+      before_install:
+        - sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 0x219BD9C9
+        - sudo apt-add-repository 'deb http://repos.azulsystems.com/ubuntu stable main'
+        - sudo apt-get update -qq && sudo apt-get install zulu-8 -y
+        - export JDK8_HOME=/usr/lib/jvm/zulu-8-amd64
       addons:
         postgresql: "9.6"
       env:
@@ -159,6 +164,13 @@ matrix:
         - NO_WAFFLE_NO_OSGI=Y
         - JDOC=Y
     - jdk: openjdk7
+      sudo: required
+      before_install:
+        - sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 0x219BD9C9
+        - sudo apt-add-repository 'deb http://repos.azulsystems.com/ubuntu stable main'
+        - sudo apt-get update -qq && sudo apt-get install zulu-7 -y
+        - export JDK7_HOME=/usr/lib/jvm/zulu-7-amd64
+        - jdk_switcher use oraclejdk8
       addons:
         postgresql: "9.4"
       env:
@@ -166,6 +178,13 @@ matrix:
         - MCENTRAL=Y
         - COVERAGE=Y
     - jdk: openjdk7
+      sudo: required
+      before_install:
+        - sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 0x219BD9C9
+        - sudo apt-add-repository 'deb http://repos.azulsystems.com/ubuntu stable main'
+        - sudo apt-get update -qq && sudo apt-get install zulu-7 -y
+        - export JDK7_HOME=/usr/lib/jvm/zulu-7-amd64
+        - jdk_switcher use oraclejdk8
       addons:
         postgresql: "9.3"
       env:
