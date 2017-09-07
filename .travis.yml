@@ -173,7 +173,7 @@ matrix:
       env:
         - PG_VERSION=9.3
         - COVERAGE=Y
-    - jdk: openjdk6
+    - jdk: zulu-6
       sudo: required
       before_install:
         - sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 0x219BD9C9
@@ -184,7 +184,7 @@ matrix:
         - PG_VERSION=9.2
         - MCENTRAL=Y
         - COVERAGE=Y
-    - jdk: openjdk6
+    - jdk: zulu-6
       sudo: required
       before_install:
         - sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 0x219BD9C9
