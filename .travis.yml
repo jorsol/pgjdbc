@@ -159,7 +159,6 @@ matrix:
         - NO_WAFFLE_NO_OSGI=Y
         - JDOC=Y
     - jdk: openjdk7
-      sudo: required
       addons:
         postgresql: "9.4"
       env:
@@ -167,30 +166,31 @@ matrix:
         - MCENTRAL=Y
         - COVERAGE=Y
     - jdk: openjdk7
-      sudo: required
       addons:
         postgresql: "9.3"
       env:
         - PG_VERSION=9.3
         - COVERAGE=Y
-    - jdk: zulu-6
+    - jdk: openjdk6
       sudo: required
       before_install:
         - sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 0x219BD9C9
         - sudo apt-add-repository 'deb http://repos.azulsystems.com/ubuntu stable main'
         - sudo apt-get update -qq && sudo apt-get install zulu-6 -y
         - export JDK6_HOME=/usr/lib/jvm/zulu-6-amd64
+        - jdk_switcher use oraclejdk8
       env:
         - PG_VERSION=9.2
         - MCENTRAL=Y
         - COVERAGE=Y
-    - jdk: zulu-6
+    - jdk: openjdk6
       sudo: required
       before_install:
         - sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 0x219BD9C9
         - sudo apt-add-repository 'deb http://repos.azulsystems.com/ubuntu stable main'
         - sudo apt-get update -qq && sudo apt-get install zulu-6 -y
         - export JDK6_HOME=/usr/lib/jvm/zulu-6-amd64
+        - jdk_switcher use oraclejdk8
       env:
         - PG_VERSION=9.1
         - COVERAGE=Y
