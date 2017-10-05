@@ -947,12 +947,25 @@ public class PgStatement implements Statement, BaseStatement {
     throw Driver.notImplemented(this.getClass(), "getLargeUpdateCount");
   }
 
+  /**
+   * The maximum number of rows to return supported by PostgreSQL is an Int32 value.
+   * <p>
+   * This implementation will use {@link Integer#MAX_VALUE} for values that exceed an Integer.
+   *
+   * @param max - the new max rows limit; zero means there is no limit
+   * @throws SQLException - if a database access error occurs, this method is called on a closed
+   * Statement or the condition {@code max >= 0} is not satisfied
+   * @see #setMaxRows
+   */
   public void setLargeMaxRows(long max) throws SQLException {
-    throw Driver.notImplemented(this.getClass(), "setLargeMaxRows");
+    if (max > Integer.MAX_VALUE) {
+      max = Integer.MAX_VALUE;
+    }
+    setMaxRows((int) max);
   }
 
   public long getLargeMaxRows() throws SQLException {
-    throw Driver.notImplemented(this.getClass(), "getLargeMaxRows");
+    return getMaxRows();
   }
 
   public long[] executeLargeBatch() throws SQLException {

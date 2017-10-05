@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004, PostgreSQL Global Development Group
+ * Copyright (c) 2014, PostgreSQL Global Development Group
  * See the LICENSE file in the project root for more information.
  */
 
@@ -8,9 +8,11 @@ package org.postgresql.test.jdbc42;
 import org.postgresql.test.TestUtil;
 import org.postgresql.test.jdbc2.BaseTest4;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 
@@ -60,4 +62,50 @@ public class PreparedStatementTest extends BaseTest4 {
 
     pstmt.close();
   }
+
+  @Test
+  public void testLargeMaxRows() throws SQLException {
+    assumeExtendedQueryProtocol("Max row hint is not supported in simple protocol execution mode");
+
+    String sql = "select * from generate_series(1, 50)";
+    PreparedStatement pstmt = con.prepareStatement(sql);
+
+    // return 3 rows
+    int count = 0;
+    pstmt.setLargeMaxRows(3);
+    ResultSet rs = pstmt.executeQuery();
+    while (rs.next()) {
+      count++;
+    }
+    Assert.assertEquals("return only 3 rows", 3, count);
+    Assert.assertEquals(3, pstmt.getLargeMaxRows());
+
+    // return 15 rows
+    count = 0;
+    pstmt.setLargeMaxRows(15);
+    rs = pstmt.executeQuery();
+    while (rs.next()) {
+      count++;
+    }
+    Assert.assertEquals("return only 15 rows", 15, count);
+    Assert.assertEquals(15, pstmt.getLargeMaxRows());
+
+    // return all rows
+    count = 0;
+    pstmt.setLargeMaxRows(0);
+    rs = pstmt.executeQuery();
+    while (rs.next()) {
+      count++;
+    }
+    Assert.assertEquals("return all 50 rows", 50, count);
+    Assert.assertEquals("0 means unlimited", 0, pstmt.getLargeMaxRows());
+
+    pstmt.setLargeMaxRows(3000000000L);
+    Assert.assertEquals("Long values are not supported, it should return Integer.MAX_VALUE",
+        Integer.MAX_VALUE, pstmt.getLargeMaxRows());
+
+    rs.close();
+    pstmt.close();
+  }
+
 }

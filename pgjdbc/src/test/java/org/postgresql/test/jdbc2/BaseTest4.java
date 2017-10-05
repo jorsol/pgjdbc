@@ -61,14 +61,16 @@ public class BaseTest4 {
     TestUtil.closeDB(con);
   }
 
+  public void assumeExtendedQueryProtocol(String msg) {
+    Assume.assumeTrue(msg, preferQueryMode.compareTo(PreferQueryMode.EXTENDED) >= 0);
+  }
+
   public void assumeByteaSupported() {
-    Assume.assumeTrue("bytea is not supported in simple protocol execution mode",
-        preferQueryMode.compareTo(PreferQueryMode.EXTENDED) >= 0);
+    assumeExtendedQueryProtocol("bytea is not supported in simple protocol execution mode");
   }
 
   public void assumeCallableStatementsSupported() {
-    Assume.assumeTrue("callable statements are not fully supported in simple protocol execution mode",
-        preferQueryMode.compareTo(PreferQueryMode.EXTENDED) >= 0);
+    assumeExtendedQueryProtocol("callable statements are not fully supported in simple protocol execution mode");
   }
 
   public void assumeBinaryModeRegular() {
