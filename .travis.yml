@@ -82,6 +82,7 @@ matrix:
       env:
         - PG_VERSION=9.6
         - JDK=9
+        - COVERAGE=Y
     - jdk: oraclejdk9
       sudo: required
       env:
