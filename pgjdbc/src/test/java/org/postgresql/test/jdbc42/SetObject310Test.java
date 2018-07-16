@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004, PostgreSQL Global Development Group
+ * Copyright (c) 2015, PostgreSQL Global Development Group
  * See the LICENSE file in the project root for more information.
  */
 
@@ -13,7 +13,9 @@ import static org.junit.Assume.assumeTrue;
 import org.postgresql.test.TestUtil;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.sql.Connection;
@@ -38,55 +40,55 @@ import java.util.List;
 import java.util.TimeZone;
 
 public class SetObject310Test {
-  private static final TimeZone saveTZ = TimeZone.getDefault();
 
-  private Connection con;
+  private static final TimeZone DEFAULT_TZ = TimeZone.getDefault();
+
+  private static Connection con;
+
+  @BeforeClass
+  public static void setUpOnce() throws Exception {
+    con = TestUtil.openDB();
+    TestUtil.createTable(con, "object310_test", "timestamp_without_time_zone_column timestamp without time zone,"
+        + "timestamp_with_time_zone_column timestamp with time zone,"
+        + "date_column date,"
+        + "time_without_time_zone_column time without time zone,"
+        + "time_with_time_zone_column time with time zone"
+    );
+  }
+
+  @AfterClass
+  public static void tearDownOnce() throws SQLException {
+    TestUtil.dropTable(con, "object310_test");
+    TestUtil.closeDB(con);
+  }
 
   @Before
   public void setUp() throws Exception {
-    con = TestUtil.openDB();
-    TestUtil.createTable(con, "table1", "timestamp_without_time_zone_column timestamp without time zone,"
-            + "timestamp_with_time_zone_column timestamp with time zone,"
-            + "date_column date,"
-            + "time_without_time_zone_column time without time zone,"
-            + "time_with_time_zone_column time with time zone"
-    );
+    deleteRows();
   }
 
   @After
   public void tearDown() throws SQLException {
-    TimeZone.setDefault(saveTZ);
-    TestUtil.dropTable(con, "table1");
-    TestUtil.closeDB(con);
+    TimeZone.setDefault(DEFAULT_TZ);
   }
 
   private void insert(Object data, String columnName, Integer type) throws SQLException {
-    PreparedStatement ps = con.prepareStatement(TestUtil.insertSQL("table1", columnName, "?"));
-    try {
+    try (PreparedStatement ps = con.prepareStatement(TestUtil.insertSQL("object310_test", columnName, "?"))) {
       if (type != null) {
         ps.setObject(1, data, type);
       } else {
         ps.setObject(1, data);
       }
       assertEquals(1, ps.executeUpdate());
-    } finally {
-      ps.close();
     }
   }
 
   private String readString(String columnName) throws SQLException {
-    Statement st = con.createStatement();
-    try {
-      ResultSet rs = st.executeQuery(TestUtil.selectSQL("table1", columnName));
-      try {
-        assertNotNull(rs);
-        assertTrue(rs.next());
-        return rs.getString(1);
-      } finally {
-        rs.close();
-      }
-    } finally {
-      st.close();
+    try (Statement st = con.createStatement();
+        ResultSet rs = st.executeQuery(TestUtil.selectSQL("object310_test", columnName))) {
+      assertNotNull(rs);
+      assertTrue(rs.next());
+      return rs.getString(1);
     }
   }
 
@@ -105,61 +107,37 @@ public class SetObject310Test {
   }
 
   private <T> T insertThenReadWithoutType(Object data, String columnName, Class<T> expectedType) throws SQLException {
-    PreparedStatement ps = con.prepareStatement(TestUtil.insertSQL("table1", columnName, "?"));
-    try {
+    try (PreparedStatement ps = con.prepareStatement(TestUtil.insertSQL("object310_test", columnName, "?"))) {
       ps.setObject(1, data);
       assertEquals(1, ps.executeUpdate());
-    } finally {
-      ps.close();
     }
 
-    Statement st = con.createStatement();
-    try {
-      ResultSet rs = st.executeQuery(TestUtil.selectSQL("table1", columnName));
-      try {
-        assertNotNull(rs);
+    try (Statement st = con.createStatement();
+        ResultSet rs = st.executeQuery(TestUtil.selectSQL("object310_test", columnName))) {
+      assertNotNull(rs);
 
-        assertTrue(rs.next());
-        return expectedType.cast(rs.getObject(1));
-      } finally {
-        rs.close();
-      }
-    } finally {
-      st.close();
+      assertTrue(rs.next());
+      return expectedType.cast(rs.getObject(1));
     }
   }
 
   private <T> T insertThenReadWithType(Object data, int sqlType, String columnName, Class<T> expectedType) throws SQLException {
-    PreparedStatement ps = con.prepareStatement(TestUtil.insertSQL("table1", columnName, "?"));
-    try {
+    try (PreparedStatement ps = con.prepareStatement(TestUtil.insertSQL("object310_test", columnName, "?"))) {
       ps.setObject(1, data, sqlType);
       assertEquals(1, ps.executeUpdate());
-    } finally {
-      ps.close();
     }
 
-    Statement st = con.createStatement();
-    try {
-      ResultSet rs = st.executeQuery(TestUtil.selectSQL("table1", columnName));
-      try {
-        assertNotNull(rs);
-
-        assertTrue(rs.next());
-        return expectedType.cast(rs.getObject(1));
-      } finally {
-        rs.close();
-      }
-    } finally {
-      st.close();
+    try (Statement st = con.createStatement();
+        ResultSet rs = st.executeQuery(TestUtil.selectSQL("object310_test", columnName))) {
+      assertNotNull(rs);
+      assertTrue(rs.next());
+      return expectedType.cast(rs.getObject(1));
     }
   }
 
   private void deleteRows() throws SQLException {
-    Statement st = con.createStatement();
-    try {
-      st.executeUpdate("DELETE FROM table1");
-    } finally {
-      st.close();
+    try (Statement st = con.createStatement()) {
+      st.executeUpdate("DELETE FROM object310_test");
     }
   }
 
@@ -189,7 +167,7 @@ public class SetObject310Test {
   @Test
   public void testSetOffsetDateTime() throws SQLException {
     List<String> zoneIdsToTest = getZoneIdsToTest();
-    List<TimeZone> storeZones = new ArrayList<TimeZone>();
+    List<TimeZone> storeZones = new ArrayList<>();
     for (String zoneId : zoneIdsToTest) {
       storeZones.add(TimeZone.getTimeZone(zoneId));
     }
@@ -224,7 +202,7 @@ public class SetObject310Test {
   }
 
   private List<String> getZoneIdsToTest() {
-    List<String> zoneIdsToTest = new ArrayList<String>();
+    List<String> zoneIdsToTest = new ArrayList<>();
     zoneIdsToTest.add("Africa/Casablanca"); // It is something like GMT+0..GMT+1
     zoneIdsToTest.add("America/Adak"); // It is something like GMT-10..GMT-9
     zoneIdsToTest.add("Atlantic/Azores"); // It is something like GMT-1..GMT+0
@@ -308,7 +286,7 @@ public class SetObject310Test {
     assumeTrue(TestUtil.haveIntegerDateTimes(con));
 
     // use BC for funsies
-    List<LocalDateTime> bcDates = new ArrayList<LocalDateTime>();
+    List<LocalDateTime> bcDates = new ArrayList<>();
     bcDates.add(LocalDateTime.parse("1997-06-30T23:59:59.999999").with(ChronoField.ERA, IsoEra.BCE.getValue()));
     bcDates.add(LocalDateTime.parse("0997-06-30T23:59:59.999999").with(ChronoField.ERA, IsoEra.BCE.getValue()));
 
