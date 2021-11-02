@@ -334,15 +334,6 @@ public enum PGProperty {
       "Include full server error detail in exception messages. If disabled then only the error itself will be included."),
 
   /**
-   * When connections that are not explicitly closed are garbage collected, log the stacktrace from
-   * the opening of the connection to trace the leak source.
-   */
-  LOG_UNCLOSED_CONNECTIONS(
-      "logUnclosedConnections",
-      "false",
-      "When connections that are not explicitly closed are garbage collected, log the stacktrace from the opening of the connection to trace the leak source"),
-
-  /**
    * Specifies size of buffer during fetching result set. Can be specified as specified size or
    * percent of heap memory.
    */

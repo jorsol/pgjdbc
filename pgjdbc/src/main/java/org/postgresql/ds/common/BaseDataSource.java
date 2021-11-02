@@ -952,22 +952,6 @@ public abstract class BaseDataSource implements CommonDataSource, Referenceable 
   }
 
   /**
-   * @return true if driver should log unclosed connections
-   * @see PGProperty#LOG_UNCLOSED_CONNECTIONS
-   */
-  public boolean getLogUnclosedConnections() {
-    return PGProperty.LOG_UNCLOSED_CONNECTIONS.getBoolean(properties);
-  }
-
-  /**
-   * @param enabled true if driver should log unclosed connections
-   * @see PGProperty#LOG_UNCLOSED_CONNECTIONS
-   */
-  public void setLogUnclosedConnections(boolean enabled) {
-    PGProperty.LOG_UNCLOSED_CONNECTIONS.set(properties, enabled);
-  }
-
-  /**
    * @return true if driver should log include detail in server error messages
    * @see PGProperty#LOG_SERVER_ERROR_DETAIL
    */
@@ -1687,10 +1671,6 @@ public abstract class BaseDataSource implements CommonDataSource, Referenceable 
 
   public boolean isAllowEncodingChanges() {
     return getAllowEncodingChanges();
-  }
-
-  public boolean isLogUnclosedConnections() {
-    return getLogUnclosedConnections();
   }
 
   public boolean isTcpKeepAlive() {

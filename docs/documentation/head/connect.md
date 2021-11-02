@@ -204,18 +204,6 @@ Connection conn = DriverManager.getConnection(url);
 	for now there is this URL parameter. Enable this only if you need to
 	override the client encoding when doing a copy.
 
-* **logUnclosedConnections** = boolean
-
-	Clients may leak `Connection` objects by failing to call its `close()`
-	method. Eventually these objects will be garbage collected and the
-	`finalize()` method will be called which will close the `Connection` if
-	caller has neglected to do this himself. The usage of a finalizer is just
-	a stopgap solution. To help developers detect and correct the source of
-	these leaks the `logUnclosedConnections` URL parameter has been added.
-	It captures a stacktrace at each `Connection` opening and if the `finalize()`
-	method is reached without having been closed the stacktrace is printed
-	to the log.
-	
 * **autosave** = String
 
     Specifies what the driver should do if a query fails. In `autosave=always` mode, JDBC driver sets a savepoint before each query,

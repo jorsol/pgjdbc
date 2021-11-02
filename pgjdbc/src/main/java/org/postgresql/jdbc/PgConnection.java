@@ -105,8 +105,6 @@ public class PgConnection implements BaseConnection {
 
   private final ReadOnlyBehavior readOnlyBehavior;
 
-  private @Nullable Throwable openStackTrace;
-
   /* Actual network handler */
   private final QueryExecutor queryExecutor;
 
@@ -296,9 +294,6 @@ public class PgConnection implements BaseConnection {
     typeCache = createTypeInfo(this, unknownLength);
     initObjectTypes(info);
 
-    if (PGProperty.LOG_UNCLOSED_CONNECTIONS.getBoolean(info)) {
-      openStackTrace = new Throwable("Connection was created at this point:");
-    }
     this.logServerErrorDetail = PGProperty.LOG_SERVER_ERROR_DETAIL.getBoolean(info);
     this.disableColumnSanitiser = PGProperty.DISABLE_COLUMN_SANITISER.getBoolean(info);
 
@@ -745,7 +740,6 @@ public class PgConnection implements BaseConnection {
     }
     releaseTimer();
     queryExecutor.close();
-    openStackTrace = null;
   }
 
   @Override
@@ -984,25 +978,6 @@ public class PgConnection implements BaseConnection {
 
   public boolean getHideUnprivilegedObjects() {
     return hideUnprivilegedObjects;
-  }
-
-  /**
-   * <p>Overrides finalize(). If called, it closes the connection.</p>
-   *
-   * <p>This was done at the request of <a href="mailto:rachel@enlarion.demon.co.uk">Rachel
-   * Greenham</a> who hit a problem where multiple clients didn't close the connection, and once a
-   * fortnight enough clients were open to kill the postgres server.</p>
-   */
-  protected void finalize() throws Throwable {
-    try {
-      if (openStackTrace != null) {
-        LOGGER.log(Level.WARNING, GT.tr("Finalizing a Connection that was never closed:"), openStackTrace);
-      }
-
-      close();
-    } finally {
-      super.finalize();
-    }
   }
 
   /**
